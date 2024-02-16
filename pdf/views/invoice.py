@@ -12,8 +12,7 @@ class InvoiceView(APIView):
     @api_view(['POST'])
     def render_pdf(request):
         dto = InvoiceDTO(data=request.data)
-        if not dto.is_valid():
-            return HttpResponseBadRequest("BAD REQUEST")
+        dto.is_valid(raise_exception=True)
         pdf_result = PDFRenderService.render_to_pdf('invoice.html', dto.data)
 
         if pdf_result.error:
