@@ -34,6 +34,10 @@
                 color: #333; /* old IE */
                 background-color: #fff; /* Modern Browsers */
             }
+            table.items th, td {
+                border: 1px solid black;
+                padding: 5px;
+            }
         </style>
     </head>
     <body>
@@ -47,6 +51,33 @@
             Amount: {{ amount }} <br/>
             Date: {{ date }}
             <hr class='hrItem' />
+        </div>
+        <div>
+            <h1>Line Items!</h1>
+            <table class="items">
+                <thead>
+                    <tr>
+                        <td>
+                            Quantity
+                        </td>
+                        <td>
+                            Price
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in line_items %}
+                    <tr>
+                        <td>
+                        {{  item.quantity }}
+                        </td>
+                        <td>
+                            {{  item.price }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
     </body>
