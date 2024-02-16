@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group
 from api.serializers import GroupSerializer
-from .authenticated import AuthenticatedViewSet
+from djangoProject.common.authenticated_view_set import AuthenticatedViewSet
 
 
 class GroupViewSet(AuthenticatedViewSet):

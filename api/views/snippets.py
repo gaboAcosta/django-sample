@@ -1,6 +1,6 @@
 from api.models import Snippet
 from api.serializers import SnippetSerializer
-from .authenticated import AuthenticatedViewSet
+from djangoProject.common.authenticated_view_set import AuthenticatedViewSet
 
 
 class SnippetsViewSet(AuthenticatedViewSet):
