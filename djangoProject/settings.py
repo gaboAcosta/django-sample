@@ -10,22 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import environ
 import os
+from pathlib import Path
 import django
 from django.utils.encoding import smart_str
 django.utils.encoding.smart_text = smart_str
 
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # reading .env file
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f#xt%y1^sbixsko$lccz45!w(r239kv52li7!n_2eh71(p%c-c'
+SECRET_KEY = env.str('DJANGO_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -35,6 +39,10 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+def is_local():
+    return env.str('ENV') == 'local' or env.str('ENV') == ''
+
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_firebase_auth',
     'rest_framework',
     'xhtml2pdf',
     'api',
@@ -133,46 +140,59 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+def get_firebase_private_key():
+    key = env.str('FIREBASE_PRIVATE_KEY')
+    private_key = '-----BEGIN PRIVATE KEY-----\n' + key.replace('\\n', '\n') + '\n-----END PRIVATE KEY-----\n'
+    return private_key
+
+
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'drf_firebase_auth.authentication.FirebaseAuthentication',
-    ),
 }
 
-DRF_FIREBASE_AUTH = {
-    # allow anonymous requests without Authorization header set
-    'ALLOW_ANONYMOUS_REQUESTS': os.getenv('ALLOW_ANONYMOUS_REQUESTS', False),
-    # allow creation of new local user in db
-    'FIREBASE_CREATE_LOCAL_USER': os.getenv('FIREBASE_CREATE_LOCAL_USER', True),
-    # attempt to split firebase user.display_name and set local user
-    # first_name and last_name
-    'FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME': os.getenv('FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME', True),
-    # commonly JWT or Bearer (e.g. JWT <token>)
-    'FIREBASE_AUTH_HEADER_PREFIX': os.getenv('FIREBASE_AUTH_HEADER_PREFIX', 'Bearer'),
-    # verify that JWT has not been revoked
-    'FIREBASE_CHECK_JWT_REVOKED': os.getenv('FIREBASE_CHECK_JWT_REVOKED', True),
-    # require that firebase user.email_verified is True
-    'FIREBASE_AUTH_EMAIL_VERIFICATION': os.getenv('FIREBASE_AUTH_EMAIL_VERIFICATION', False),
-    # secrets of firebase
-    'FIREBASE_SERVICE_ACCOUNT_KEY': {
-        'type': 'service_account',
-        'project_id': os.getenv('GOOGLE_PROJECT_ID'),
-        'private_key_id': os.getenv('FIREBASE_KEY'),
-        'private_key': os.getenv('FIREBASE_PRIVATE_KEY'),
-        'client_email': os.getenv('FIREBASE_ADMIN_EMAIL'),
-        'client_id': os.getenv('FIREBASE_CLIENT_ID'),
-        'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
-        'token_uri': 'https://oauth2.googleapis.com/token',
-        'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
-        'client_x509_cert_url': os.getenv('FIREBASE_CERT_URL'),
-        'universe_domain': 'googleapis.com'
-    }
-}
+DRF_FIREBASE_AUTH = {}
 
+
+if not is_local():
+    INSTALLED_APPS.append('drf_firebase_auth')
+    REST_FRAMEWORK.update({
+        'DEFAULT_PERMISSION_CLASSES': [
+            'rest_framework.permissions.IsAuthenticated',
+        ],
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework.authentication.BasicAuthentication',
+            'rest_framework.authentication.SessionAuthentication',
+            'drf_firebase_auth.authentication.FirebaseAuthentication',
+        ),
+    })
+    DRF_FIREBASE_AUTH.update({
+        # allow anonymous requests without Authorization header set
+        'ALLOW_ANONYMOUS_REQUESTS': os.getenv('ALLOW_ANONYMOUS_REQUESTS', False),
+        # allow creation of new local user in db
+        'FIREBASE_CREATE_LOCAL_USER': os.getenv('FIREBASE_CREATE_LOCAL_USER', True),
+        # attempt to split firebase user.display_name and set local user
+        # first_name and last_name
+        'FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME': os.getenv('FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME', True),
+        # commonly JWT or Bearer (e.g. JWT <token>)
+        'FIREBASE_AUTH_HEADER_PREFIX': os.getenv('FIREBASE_AUTH_HEADER_PREFIX', 'Bearer'),
+        # verify that JWT has not been revoked
+        'FIREBASE_CHECK_JWT_REVOKED': os.getenv('FIREBASE_CHECK_JWT_REVOKED', True),
+        # require that firebase user.email_verified is True
+        'FIREBASE_AUTH_EMAIL_VERIFICATION': os.getenv('FIREBASE_AUTH_EMAIL_VERIFICATION', False),
+        # secrets of firebase
+        'FIREBASE_SERVICE_ACCOUNT_KEY': {
+            'type': 'service_account',
+            'project_id': os.getenv('FIREBASE_PROJECT_ID'),
+            'private_key_id': os.getenv('FIREBASE_PRIVATE_KEY_ID'),
+            'private_key': get_firebase_private_key(),
+            'client_email': os.getenv('FIREBASE_CLIENT_EMAIL'),
+            'client_id': os.getenv('FIREBASE_CLIENT_ID'),
+            'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+            'token_uri': 'https://oauth2.googleapis.com/token',
+            'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
+            'client_x509_cert_url': os.getenv('FIREBASE_CERT_URL'),
+            'universe_domain': 'googleapis.com'
+        }
+})
