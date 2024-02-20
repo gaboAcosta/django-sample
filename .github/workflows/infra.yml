@@ -1,4 +1,4 @@
-name: infra
+name: infra-apply
 
 on: workflow_dispatch
 
