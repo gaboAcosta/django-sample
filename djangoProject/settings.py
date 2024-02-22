@@ -36,7 +36,11 @@ SECRET_KEY = env.str('DJANGO_SECRET')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'django-test-service-cqnxq53ntq-uc.a.run.app'
+]
 
 
 # Application definition

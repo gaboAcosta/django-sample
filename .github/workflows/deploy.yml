@@ -37,4 +37,4 @@ jobs:
           image: ${{ env.GAR_LOCATION }}/django-test-service:${{ inputs.target_version }}
 
       - name: Deploy Output
-        run: curl "${{ steps.deploy.outputs.url }}"
+        run: echo ${{ steps.deploy.outputs }}
