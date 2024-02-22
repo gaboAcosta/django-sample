@@ -1,0 +1,40 @@
+name: Build Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: Target version
+        required: true
+        type: string
+
+env:
+  REGION: ${{secrets.GC_REGION }}
+  GAR_LOCATION: ${{secrets.GAR_LOCATION}}
+
+jobs:
+  deploy:
+    environment: development
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: google-auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: '>= 363.0.0'
+
+      - name: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: django-test-service
+          image: ${{ env.GAR_LOCATION }}/django-test-service:${{ inputs.target_version }}
+
+      - name: Deploy Output
+        run: curl "${{ steps.deploy.outputs.url }}"
