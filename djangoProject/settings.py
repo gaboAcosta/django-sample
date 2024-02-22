@@ -42,6 +42,8 @@ ALLOWED_HOSTS = [
     'django-test-service-cqnxq53ntq-uc.a.run.app'
 ]
 
+CSRF_TRUSTED_ORIGINS = ['https://django-test-service-cqnxq53ntq-uc.a.run.app']
+
 
 # Application definition
 

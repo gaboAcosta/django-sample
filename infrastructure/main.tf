@@ -31,7 +31,7 @@ resource "google_cloud_run_v2_service" "default" {
     }
 
     containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      image = var.container_image
       env {
         name  = "ENV"
         value = "development"
@@ -84,6 +84,67 @@ resource "google_cloud_run_v2_service" "default" {
         name  = "DATABASE_PORT"
         value = "5432"
       }
+
+      env {
+        name = "FIREBASE_PROJECT_ID"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_firebase_project_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "FIREBASE_PRIVATE_KEY_ID"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_firebase_private_key_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "FIREBASE_PRIVATE_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_firebase_private_key
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "FIREBASE_CLIENT_EMAIL"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_firebase_client_email
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "FIREBASE_CLIENT_ID"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_firebase_client_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "FIREBASE_CERT_URL"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_firebase_cert_url
+            version = "latest"
+          }
+        }
+      }
+
       volume_mounts {
         name       = "cloudsql"
         mount_path = "/cloudsql"

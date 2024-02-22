@@ -43,6 +43,18 @@ jobs:
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_project: ${{ secrets.GOOGLE_PROJECT_ID }}
+          TF_VAR_container_image: ${{ secrets.CONTAINER_IMAGE }}
+          TF_VAR_sql_instance: ${{ secrets.SQL_INSTANCE }}
+          TF_VAR_secret_django_secret: ${{ secrets.SECRET_DJANGO_SECRET }}
+          TF_VAR_secret_database_name: ${{ secrets.SECRET_DATABASE_NAME }}
+          TF_VAR_secret_database_password: ${{ secrets.SECRET_DATABASE_PASSWORD }}
+          TF_VAR_secret_database_host: ${{ secrets.SECRET_DATABASE_HOST }}
+          TF_VAR_secret_firebase_cert_url: ${{ secrets.SECRET_FIREBASE_CERT_URL }}
+          TF_VAR_secret_firebase_client_email: ${{ secrets.SECRET_FIREBASE_CLIENT_EMAIL }}
+          TF_VAR_secret_firebase_client_id: ${{ secrets.SECRET_FIREBASE_CLIENT_ID }}
+          TF_VAR_secret_firebase_private_key: ${{ secrets.SECRET_FIREBASE_PRIVATE_KEY }}
+          TF_VAR_secret_firebase_private_key_id: ${{ secrets.SECRET_FIREBASE_PRIVATE_KEY_ID }}
+          TF_VAR_secret_firebase_project_id: ${{ secrets.SECRET_FIREBASE_PROJECT_ID }}
 
         # On push to "main", build or change infrastructure according to Terraform configuration files
         # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
