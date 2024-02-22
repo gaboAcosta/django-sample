@@ -23,8 +23,71 @@ resource "google_cloud_run_v2_service" "default" {
   name     = "django-test-service"
 
   template {
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [var.sql_instance]
+      }
+    }
+
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
+      env {
+        name  = "ENV"
+        value = "development"
+      }
+      env {
+        name = "DJANGO_SECRET"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_django_secret
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name  = "DATABASE_ENGINE"
+        value = "django.db.backends.postgresql"
+      }
+      env {
+        name = "DATABASE_NAME"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_database_name
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name  = "DATABASE_USER"
+        value = "postgres"
+      }
+      env {
+        name = "DATABASE_PASSWORD"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_database_password
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "DATABASE_HOST"
+        value_source {
+          secret_key_ref {
+            secret  = var.secret_database_host
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name  = "DATABASE_PORT"
+        value = "5432"
+      }
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
     }
   }
 }
